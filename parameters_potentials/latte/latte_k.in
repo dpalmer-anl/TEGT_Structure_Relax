@@ -7,7 +7,7 @@
   KBT= 1.0
   NORECS= 1
   PARAMPATH= "../../../parameters_potentials/latte/Porezag_Popov_Van_Alsenoy_pz/latte" 
-  COORDSFILE= "ab_latte.dat"
+  COORDSFILE= "latte.dat"
   ENTROPYKIND= 1
   PPOTON= 0 VDWON= 0
   SPINON= 0 SPINTOL= 1.0e-4

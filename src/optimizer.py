@@ -9,7 +9,7 @@ import numpy as np
 
 from ase.optimize.optimize import Optimizer
 
-class FIRE(Optimizer):
+class TEGT_FIRE(Optimizer):
     def __init__(self, atoms, restart=None, logfile='-', trajectory=None,
                  dt=0.1, maxstep=None, maxmove=None, dtmax=1.0, Nmin=5,
                  finc=1.1, fdec=0.5,
@@ -56,7 +56,7 @@ class FIRE(Optimizer):
             falls back to force_consistent=False if not.  Only meaningful
             when downhill_check is True.
         """
-        Optimizer.__init__(self, atoms, restart, logfile, trajectory,
+        Optimizer.__init__(self, atoms, calc, restart, logfile, trajectory,
                            master, force_consistent=force_consistent)
 
         self.dt = dt
@@ -90,22 +90,25 @@ class FIRE(Optimizer):
 
     def step(self, f=None):
         atoms = self.atoms
-
+        calc.run(atoms)
         if f is None:
-            f = atoms.get_forces()
+            #f = atoms.get_forces()
+            f = calc.get_forces()
 
         if self.v is None:
             self.v = np.zeros((len(atoms), 3))
             if self.downhill_check:
-                self.e_last = atoms.get_potential_energy(
-                    force_consistent=self.force_consistent)
+                #self.e_last = atoms.get_potential_energy(
+                #    force_consistent=self.force_consistent)
+                self.e_last = calc.get_potential_energy()
                 self.r_last = atoms.get_positions().copy()
                 self.v_last = self.v.copy()
         else:
             is_uphill = False
             if self.downhill_check:
-                e = atoms.get_potential_energy(
-                    force_consistent=self.force_consistent)
+                #e = atoms.get_potential_energy(
+                #    force_consistent=self.force_consistent)
+                e = calc.get_potential_energy()
                 # Check if the energy actually decreased
                 if e > self.e_last:
                     # If not, reset to old positions...
@@ -114,8 +117,9 @@ class FIRE(Optimizer):
                                                      self.e_last)
                     atoms.set_positions(self.r_last)
                     is_uphill = True
-                self.e_last = atoms.get_potential_energy(
-                    force_consistent=self.force_consistent)
+                # self.e_last = atoms.get_potential_energy(
+                #     force_consistent=self.force_consistent)
+                self.e_last = calc.get_potential_energy()
                 self.r_last = atoms.get_positions().copy()
                 self.v_last = self.v.copy()
 
@@ -141,3 +145,24 @@ class FIRE(Optimizer):
         r = atoms.get_positions()
         atoms.set_positions(r + dr)
         self.dump((self.v, self.dt))
+        
+if __name__=="__main__":
+    #if no tight binding parameters given, just run full relaxation in lammps
+    import flatgraphene as fg
+    import TEGT_calculator
+    a=2.46
+    d=3.35
+    atoms = fg.shift.make_graphene(stacking=['A','B'],cell_type='rect',
+                        n_layer=2,n_1=5,n_2=5,lat_con=2.46,
+                        sep=d,sym=["B",'Ti'],mass=[12.01,12.02],h_vac=5)   
+    
+    model_dict = dict({"tight binding parameters":"Popov Van Alsenoy",
+                     "orbitals":"pz",
+                     "nkp":225,
+                     "intralayer potential":"Pz rebo",
+                     "interlayer potential":"Pz KC inspired",
+                     'use mpi':True})
+    
+    calc = TEGT_calculator.TEGT_Calc(model_dict)
+    dyn = TEGT_FIRE(atoms,calc, restart='qn.pckl',logfile='log.output')
+    dyn.run(fmax=1e-5)
