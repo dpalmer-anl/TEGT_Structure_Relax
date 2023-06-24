@@ -191,11 +191,12 @@ if __name__=="__main__":
         
     if restart:
         calc_dir = 'calc__116969195546821886'
-        atoms = ase.io.read(os.path.join(calc_dir,'dump.latte'),format='lammps-dump-text')
+        # atoms = ase.io.read(os.path.join(calc_dir,'dump.latte'),format='lammps-dump-text')
         
-        calc = TEGT_calculator.TEGT_Calc(restart_file = os.path.join(calc_dir,'model.json'))
-        atoms.calc = calc
-        dyn = TEGT_FIRE(atoms, restart=os.path.join(calc_dir,'qn.pckl')
-                        ,logfile=os.path.join(calc_dir,'ase_opt.output'),
-                         trajectory=os.path.join(calc_dir,'ab_bilayer.traj'))
+        # calc = TEGT_calculator.TEGT_Calc(restart_file = os.path.join(calc_dir,'model.json'))
+        # atoms.calc = calc
+        # dyn = TEGT_FIRE(atoms, restart=os.path.join(calc_dir,'qn.pckl')
+        #                 ,logfile=os.path.join(calc_dir,'ase_opt.output'),
+        #                  trajectory=os.path.join(calc_dir,'ab_bilayer.traj'))
+        dyn = restart_relax(calc_dir)
         dyn.run(fmax=1e-6)
