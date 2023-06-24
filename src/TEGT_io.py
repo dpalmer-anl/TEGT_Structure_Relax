@@ -19,9 +19,11 @@ option_to_file={"Porezag":os.path.join(repo_root,"parameters_potentials/latte/Po
                      "Rebo":os.path.join(repo_root,"parameters_potentials/lammps/intralayer_correction/CH.rebo"),
                      "Pz pairwise":os.path.join(repo_root,"parameters_potentials/lammps/intralayer_correction/pz_pairwise_correction.table"),
                      "Pz rebo":os.path.join(repo_root,"parameters_potentials/lammps/intralayer_correction/CH_pz.rebo"),
+                     "Pz rebo nkp225":os.path.join(repo_root,"parameters_potentials/lammps/intralayer_correction/CH_pz.rebo_nkp225"),
                      "kolmogorov crespi":os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/fullKC.txt"),
                      "KC inspired":os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/KC_insp.txt"),
                      "Pz KC inspired":os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/KC_insp_pz.txt"),
+                     "Pz KC inspired nkp225":os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/KC_insp_pz.txt_nkp225"),
                      "Pz kolmogorov crespi":os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/fullKC_pz.txt"),
                      "Pz kolmogorov crespi + KC inspired":[os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/KC_insp.txt"),
                                                            os.path.join(repo_root,"parameters_potentials/lammps/interlayer_correction/fullKC_pz_correction.txt")],
@@ -66,6 +68,9 @@ def write_lammps_input(input_filename,intralayer_pot,interlayer_pot,calc_type,us
     elif intralayer_pot == "Pz rebo":
         pair_style+=" rebo "
         pair_coeff+="pair_coeff	* * rebo "+option_to_file["Pz rebo"]+"        C C\n"
+    elif intralayer_pot == "Pz rebo nkp225":
+        pair_style+=" rebo "
+        pair_coeff+="pair_coeff	* * rebo "+option_to_file["Pz rebo nkp225"]+"        C C\n"
     else:
         pair_style="pair_style none\n"
         pair_coeff=""
@@ -82,6 +87,10 @@ def write_lammps_input(input_filename,intralayer_pot,interlayer_pot,calc_type,us
     elif interlayer_pot == "Pz KC inspired":
         pair_style += " reg/dep/poly 10.0 0 "
         pair_coeff+="pair_coeff       * *   reg/dep/poly  "+option_to_file["Pz KC inspired"]+"   C C\n"
+        
+    elif interlayer_pot == "Pz KC inspired nkp225":
+        pair_style += " reg/dep/poly 10.0 0 "
+        pair_coeff+="pair_coeff       * *   reg/dep/poly  "+option_to_file["Pz KC inspired nkp225"]+"   C C\n"
         
     elif interlayer_pot == "Pz kolmogorov crespi":
         pair_style += " kolmogorov/crespi/full 10.0 0 "
